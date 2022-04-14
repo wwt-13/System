@@ -14,7 +14,7 @@ Part1. MIPS definitions
 */
 
 #define BY2PG 4096              // 定义了页大小
-#define PDMAP (4 * 1024 * 1024) //暂时不理解
+#define PDMAP (4 * 1024 * 1024) // 貌似是二级页表所占的空间大小？？
 #define PGSHIFT 12
 #define PDSHIFT 22
 
@@ -64,6 +64,15 @@ Part2. Our conventions
  a     0 ------------>  +----------------------------+ -----------------------------
  o
 */
+#define KERNBASE 0x80010000 // 内核起始地址
+
+#define VPT (ULIM + PDMAP)      // 暂时不太理解
+#define KSTACKTOP (VPT - 0x100) // 暂时不太理解
+#define KSTKSIZE (8 * BY2PG)    // 貌似是栈大小？？
+#define ULIM 0x80000000         // 操作系统的起始地址
+
+// 这里还有一些宏,暂时不管
+
 /*
 Part3. Our helper functions
 */
@@ -86,6 +95,30 @@ extern u_long npage;
 
 typedef u_long Pde;
 typedef u_long Pte;
+
+/* 关于volatile变量
+定义为volatile的变量就是对编译器声明该变量可能会被意想不到的改变
+编译器不回去假设这个变量的值
+编译器在用到volatile变量的时候必须从内存中读取,而不能使用保存在寄存器中的值
+下面是volatile变量的几个例子:
+1.并行设备的硬件寄存器（如：状态寄存器）；
+2.一个中断服务子程序中会访问到的非自动变量（Non-automatic variables）；
+3.多线程应用中的共享变量；
+暂时还没看到这两个变量在程序中出现，暂时不管
+*/
+extern volatile Pte *vpt[];
+extern volatile Pde *vpd[];
+
+// 将内核(kseg0)的虚拟地址翻译为物理地址(去除首位即可)
+// 很妙的方法,直接将地址和操作系统起始地址相减即可
+// 如果虚拟地址不在kseg0范围内,则报错
+#define PADDR(kva)                                           \
+    ({                                                       \
+        u_long a = (u_long)(kva);                            \
+        if (a < ULIM)                                        \
+            panic("PADDR called with invalid kva %08lx", a); \
+        a - ULIM;                                            \
+    })
 
 #endif
 #endif

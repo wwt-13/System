@@ -46,6 +46,7 @@ static void *alloc(u_int n, u_int align, int clear)
     // end变量的定义位于tools/scse0_3.lds:end=0x80400000(总结后)
     // end是虚拟地址,为kseg0,去除首位,得到对应的物理地址是0x400000
     // 所以我们管理的物理地址区间是[0x00400000,0x03ffffff]  (也就是说我们实际上只用了60MB的物理空间)
+    // 当然如果算上内核的空间的话正好是64MB,对于物理地址为[0x00000000,0x03ffffff]
     // 这里观察include/mmu.h中的内存布局图,可以发现很多东西
     // 0x80000000-0x80010000存放的是中断异常相关的代码
     // 0x80010000-0x80400000存放的就是内核代码(全连上了,64MB物理空间)
@@ -75,6 +76,7 @@ static void *alloc(u_int n, u_int align, int clear)
 static Pte *boot_pgdir_walk(Pde *pgdir, u_long va, int create)
 {
 }
+//
 void boot_map_segment(Pde *pgdir, u_long va, u_long size, u_long pa, int perm)
 {
 }
