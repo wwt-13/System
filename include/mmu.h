@@ -13,7 +13,10 @@ Part3. Our helper functions.
 Part1. MIPS definitions
 */
 
-#define BY2PG 4096 // 定义了页大小
+#define BY2PG 4096              // 定义了页大小
+#define PDMAP (4 * 1024 * 1024) //暂时不理解
+#define PGSHIFT 12
+#define PDSHIFT 22
 
 /*
 Part2. Our conventions
@@ -73,9 +76,10 @@ void bzero(void *, size_t);
 // 暂时不理解
 extern char bootstacktop[], bootstack[];
 
-// 还有一个奇怪的问题没有解决:看到很多地方,头文件中都只有函数的定义而没有函数的实现,那为什么使用的时候只需要include"头文件"就能使用了呢(明明头文件里只有相关函数的定义呀)?
+// 还有一个奇怪的问题没有解决:看到很多地方,头文件中都只有函数的定义而没有函数的实现,那为什么使用的时候只需要include"头文件"就能使用了呢(明明头文件里只有相关函数的定义)?
 /*下面是这个问题的具体解答
-
+知乎问答链接:https://www.zhihu.com/question/389126944
+具体解释见test/INCLUDE/关于include.md
 */
 // 定义物理页的大小
 extern u_long npage;
