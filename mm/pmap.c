@@ -13,10 +13,10 @@ u_long extmem;  // 扩展内存大小,本实验中不涉及,置0即可
 
 Pde *boot_pgdir; // Pde的定义在mmu.h中,原类型是u_long
 
-struct Page *pages;
+struct Page *pages;    // 定义的是链表数组
 static u_long freemem; // 貌似定义的是内存分配的初始地址
 
-static struct Page_list page_free_list;
+static struct Page_list page_free_list; // 定义的是链表head
 
 // 内存管理变量初始化函数
 // 需要初始化maxpa,basemem,npage,extmem
@@ -104,10 +104,24 @@ void mips_vm_init()
     // 为一级页表分配一页内存空间(并将空间清空)
     pgdir = alloc(BY2PG, BY2PG, 1); // pgdir = 0x80400000
     printf("to memory %x for struct page directory.\n", freemem);
-    mCONTEXT = (int)pgdir; // 任然不清楚干啥用
+    mCONTEXT = (int)pgdir; // 仍然不清楚干啥用
 
-    // boot_pgdir是内核以及页表的初始虚拟地址
+    // boot_pgdir是一级页表的初始虚拟地址
     boot_pgdir = pgdir;
+
+    /* 为物理内存管理所需要用到的Page结构体按页分配内存
+    (这里最好等完全理解了pages的结构再来看:定义位于include/pmap.h中)
+    1. 为管理内存的链表数组分配空间
+    经过测试(test/PAGES),得到struct Page的大小是24字节,64MB的物理内存,
+    页面大小4KB,总共需要分配16K个链表,16K*24B=384KB 384KB/4KB=96
+    所以正好分配了96个页面
+    */
+    // 可以保证所有链表都是连续分配的
+    pages = (struct Page *)alloc(npage * sizeof(struct Page), BY2PG, 1);
+    printf("to memory %x for struct Pages.\n", freemem);
+    // n是实际分配的内存空间大小
+    n = ROUND(npage * sizeof(struct Page), BY2PG);
+    boot_map_segment(pgdir, UPAGES, n, PADDR(pages), PTE_R);
 }
 
 // 用于初始化Pages结构体以及空闲链表

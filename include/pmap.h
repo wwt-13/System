@@ -11,9 +11,30 @@
 #include "mmu.h"
 #include "printf.h"
 
+/* 定义链表结构体 */
+
+// 定义Page_list结构体
+// 参考LIST_HEAD的定义可将下方代码等价转换为
+// struct Page_list{
+//     struct Page *lh_first
+// };
 LIST_HEAD(Page_list, Page);
+
+// 参考LIST_ENTRY的定义可将下方代码等价转换为
+// struct{
+//     struct Page *le_next;
+//     struct Page **le_prev;
+// };
 typedef LIST_ENTRY(Page) Page_LIST_entry_t;
 
+// 同理,可将链表项的定义等价转化为
+// struct Page{
+//     struct{
+//         struct Page *le_next;
+//         struct Page **le_prev;
+//     }pp_link;
+//     u_short pp_ref;
+// };
 struct Page
 {
     Page_LIST_entry_t pp_link;
@@ -21,7 +42,7 @@ struct Page
     u_short pp_ref; // 该页被alloc的次数
 };
 // 利用extern关键字引用外部已经定义的全局变量
-extern struct Page pages;
+extern struct Page pages; // pages的定义位于pmap.c
 
 // static inline详解
 // static
