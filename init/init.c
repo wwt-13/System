@@ -7,6 +7,7 @@
 #include <printf.h>
 #include <trap.h>
 
+// mips_init()的实现位置
 void mips_init()
 {
     printf("init.c:\tmips_init() is called\n");
@@ -19,6 +20,7 @@ void mips_init()
 
     page_init();
 
+    // 下面两个代码都是用于检测你所填写的代码是否正确的函数,与整体启动流程无关
     physical_memory_manage_check();
     page_check();
 

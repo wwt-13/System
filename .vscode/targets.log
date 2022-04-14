@@ -1,0 +1,316 @@
+make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make.exe: *** No rule to make target 'all'.  Stop.
+
+# GNU Make 4.2.1
+# Built for x86_64-w64-mingw32
+# Copyright (C) 1988-2016 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Thu Apr 14 10:41:34 2022
+
+# Variables
+
+# 'override' directive
+GNUMAKEFLAGS := 
+# automatic
+<D = $(patsubst %/,%,$(patsubst %\,%,$(dir $<)))
+# automatic
+?F = $(notdir $?)
+# default
+.SHELLFLAGS := -c
+# environment
+GATEWAY_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\gateway.vmoptions
+# makefile
+MAKEFLAGS = pqrR
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(patsubst %\,%,$(dir $?)))
+# environment
+PLATFORMIO_IDE = 2.4.3
+# environment
+WEBSTORM_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\webstorm.vmoptions
+# automatic
+@D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
+# environment
+HOMEDRIVE = C:
+# automatic
+@F = $(notdir $@)
+# automatic
+^D = $(patsubst %/,%,$(patsubst %\,%,$(dir $^)))
+# makefile
+CURDIR := d:/OS/System
+# default
+SHELL := sh.exe
+# environment
+APPCODE_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\appcode.vmoptions
+# environment
+WINDIR = C:\Windows
+# environment
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"1a7316c624e1dd66d26cf581ee0fb4ca.zh-cn","_translationsConfigFile":"C:\\Users\\12704\\AppData\\Roaming\\Code\\clp\\1a7316c624e1dd66d26cf581ee0fb4ca.zh-cn\\tcf.json","_cacheRoot":"C:\\Users\\12704\\AppData\\Roaming\\Code\\clp\\1a7316c624e1dd66d26cf581ee0fb4ca.zh-cn","_resolvedLanguagePackCoreLocation":"C:\\Users\\12704\\AppData\\Roaming\\Code\\clp\\1a7316c624e1dd66d26cf581ee0fb4ca.zh-cn\\dfd34e8260c270da74b5c2d86d61aee4b6d56977","_corruptedFile":"C:\\Users\\12704\\AppData\\Roaming\\Code\\clp\\1a7316c624e1dd66d26cf581ee0fb4ca.zh-cn\\corrupted.info","_languagePackSupport":true}
+# environment
+ONEDRIVE = C:\Users\12704\OneDrive
+# environment
+PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# environment
+TMP = C:\Users\12704\AppData\Local\Temp
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+PROGRAMW6432 = C:\Program Files
+# environment
+PROGRAMDATA = C:\ProgramData
+# environment
+WEBIDE_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\webide.vmoptions
+# environment
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-c6ac651f-5d18-4096-a014-3dbcdb4cc25f-sock
+# environment
+VSCODE_CWD = C:\Users\12704\AppData\Local\Programs\Microsoft VS Code
+# makefile (from 'Makefile', line 6)
+mm_dir := mm
+# default
+MAKE_HOST := x86_64-w64-mingw32
+# environment
+NO_PROXY = 127.0.0.1
+# environment
+PHPSTORM_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\phpstorm.vmoptions
+# environment
+COMMONPROGRAMW6432 = C:\Program Files\Common Files
+# environment
+ZES_ENABLE_SYSMAN = 1
+# environment
+CHOCOLATEYLASTPATHUPDATE = 132940590141964829
+# environment
+PROCESSOR_ARCHITECTURE = AMD64
+# environment
+USERPROFILE = C:\Users\12704
+# environment
+CHOCOLATEYINSTALL = C:\ProgramData\chocolatey
+# environment
+ALLUSERSPROFILE = C:\ProgramData
+# environment
+GOLAND_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\goland.vmoptions
+# environment
+VSCODE_LOG_STACK = false
+# environment
+NUMBER_OF_PROCESSORS = 16
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+JETBRAINSCLIENT_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\jetbrainsclient.vmoptions
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync
+# environment
+IDEA_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\idea.vmoptions
+# environment
+DATASPELL_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\dataspell.vmoptions
+# automatic
+%F = $(notdir $%)
+# environment
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_9172_LIAEGPTPIHKAXODF
+# environment
+VSCODE_PIPE_LOGGING = true
+# makefile (from 'Makefile', line 5)
+lib_dir := lib
+# environment
+COMPUTERNAME = LAPTOP-0D736712
+# environment
+PROGRAMFILES = C:\Program Files
+# default
+.LOADED := 
+# environment
+DRIVERDATA = C:\Windows\System32\Drivers\DriverData
+# environment
+JETBRAINS_CLIENT_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\jetbrains_client.vmoptions
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+USERNAME = 12704
+# environment
+PUBLIC = C:\Users\Public
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+RIDER_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\rider.vmoptions
+# environment
+VSCODE_CODE_CACHE_PATH = C:\Users\12704\AppData\Roaming\Code\CachedData\dfd34e8260c270da74b5c2d86d61aee4b6d56977
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# makefile (from 'Makefile', line 9)
+vmlinux_elf := gxemul/vmlinux
+# environment
+COMMONPROGRAMFILES = C:\Program Files\Common Files
+# environment
+LOGONSERVER = \\LAPTOP-0D736712
+# environment
+ONEDRIVECONSUMER = C:\Users\12704\OneDrive
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+USERDOMAIN = LAPTOP-0D736712
+# environment
+MAKELEVEL := 0
+# environment
+PLATFORMIO_PATH = C:\Users\12704\.platformio\python3;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Bandizip\;C:\Program Files\dotnet\;C:\Program Files\mingw64\bin;C:\Users\12704\AppData\Local\Programs\Python\Python39;C:\Users\12704\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\12704\AppData\Local\Programs\Python\Python38;C:\Users\12704\AppData\Local\Programs\Python\Python37;C:\Python310\;C:\Python310\Scripts\;C:\Program Files\Java\jdk-17.0.2\bin;C:\Program Files\Java\jdk-17.0.2\jre\bin;D:\Git\cmd;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\LLVM\bin;C:\Users\12704\AppData\Local\Microsoft\WindowsApps;C:\Users\12704\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\12704\AppData\Roaming\npm;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Bandizip\;C:\Program Files\dotnet\;C:\Program Files\mingw64\bin;C:\Users\12704\AppData\Local\Programs\Python\Python39;C:\Users\12704\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\12704\AppData\Local\Programs\Python\Python38;C:\Users\12704\AppData\Local\Programs\Python\Python37;C:\Python310\;C:\Python310\Scripts\;C:\Program Files\Java\jdk-17.0.2\bin;C:\Program Files\Java\jdk-17.0.2\jre\bin;D:\Git\cmd;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\LLVM\bin;C:\Users\12704\AppData\Local\Microsoft\WindowsApps;C:\Users\12704\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\12704\AppData\Roaming\npm
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+PATH = C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Bandizip\;C:\Program Files\dotnet\;C:\Program Files\mingw64\bin;C:\Users\12704\AppData\Local\Programs\Python\Python39;C:\Users\12704\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\12704\AppData\Local\Programs\Python\Python38;C:\Users\12704\AppData\Local\Programs\Python\Python37;C:\Python310\;C:\Python310\Scripts\;C:\Program Files\Java\jdk-17.0.2\bin;C:\Program Files\Java\jdk-17.0.2\jre\bin;D:\Git\cmd;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\LLVM\bin;C:\Users\12704\AppData\Local\Microsoft\WindowsApps;C:\Users\12704\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\12704\AppData\Roaming\npm
+# environment
+JAVA_HOME = C:\Program Files\Java\jdk-17.0.2
+# default
+MAKE_VERSION := 4.2.1
+# makefile
+.DEFAULT_GOAL := 
+# environment
+CLASSPATH = .;C:\Program Files\Java\jdk-17.0.2\bin;C:\Program Files\Java\jdk-17.0.2\lib\dt.jar;C:\Program Files\Java\jdk-17.0.2\lib\tools.jar
+# environment
+PROGRAMFILES(X86) = C:\Program Files (x86)
+# automatic
+%D = $(patsubst %/,%,$(patsubst %\,%,$(dir $%)))
+# makefile (from 'Makefile', line 4)
+init_dir := init
+# environment
+LOCALAPPDATA = C:\Users\12704\AppData\Local
+# environment
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules
+# default
+MAKE_COMMAND := make.exe
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 141 Stepping 1, GenuineIntel
+# environment
+OS = Windows_NT
+# environment
+VSCODE_IPC_HOOK = \\.\pipe\dcb6af9eb61754aeea32a837bff160c1-1.66.2-main-sock
+# environment
+HOMEPATH = \Users\12704
+# environment
+COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
+# environment
+PROMPT = $P$G
+# environment
+MFLAGS = -pqrR
+# automatic
+*D = $(patsubst %/,%,$(patsubst %\,%,$(dir $*)))
+# environment
+SYSTEMROOT = C:\Windows
+# environment
+RUBYMINE_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\rubymine.vmoptions
+# automatic
++D = $(patsubst %/,%,$(patsubst %\,%,$(dir $+)))
+# makefile (from 'Makefile', line 3)
+boot_dir := boot
+# environment
+DATAGRIP_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\datagrip.vmoptions
+# automatic
++F = $(notdir $+)
+# environment
+APPDATA = C:\Users\12704\AppData\Roaming
+# environment
+__COMPAT_LAYER = RunAsAdmin
+# environment
+TEMP = C:\Users\12704\AppData\Local\Temp
+# environment
+COMSPEC = C:\Windows\system32\cmd.exe
+# environment
+PYCHARM_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\pycharm.vmoptions
+# default
+MAKEFILES := 
+# automatic
+<F = $(notdir $<)
+# environment
+PLATFORMIO_CALLER = vscode
+# makefile (from 'Makefile', line 7)
+tools_dir := tools
+# environment
+LC_ALL = C
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+SYSTEMDRIVE = C:
+# environment
+PROCESSOR_REVISION = 8d01
+# makefile (from 'Makefile', line 2)
+drivers_dir := drivers_dir
+# default
+.RECIPEPREFIX := 
+# environment
+CLION_VM_OPTIONS = D:\BaiduNetdiskDownload\ja-netfilter-all\vmoptions\clion.vmoptions
+# environment
+LANG = C
+# environment
+PROCESSOR_LEVEL = 6
+# environment
+VSCODE_PID = 9172
+# makefile (from 'Makefile', line 11)
+link_script := tools/scse0_3.lds
+# environment
+USERDOMAIN_ROAMINGPROFILE = LAPTOP-0D736712
+# variable set hash-table stats:
+# Load=123/1024=12%, Rehash=0, Collisions=20/144=14%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (key d:/OS/System, mtime 1649841420): 17 files, no impossibilities.
+
+# 17 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-14 10:39:50
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=4/1024=0%, Rehash=0, Collisions=0/14=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 20 / storage = 124 B / avg = 6 B
+# current buf: size = 8162 B / used = 124 B / count = 20 / avg = 6 B
+
+# strcache performance: lookups = 23 / hit rate = 13%
+# hash-table stats:
+# Load=20/8192=0%, Rehash=0, Collisions=1/23=4%
+# Finished Make data base on Thu Apr 14 10:41:34 2022
+
+ 

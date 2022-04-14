@@ -11,7 +11,7 @@ u_long npage;   // 总物理页数(注意是物理页数不是虚拟页数)
 u_long basemem; // 物理内存对应的字节数
 u_long extmem;  // 扩展内存大小,本实验中不涉及,置0即可
 
-Pde *boot_pgdir; // Pde的重命名在mmu.h中,原类型是u_long
+Pde *boot_pgdir; // Pde的定义在mmu.h中,原类型是u_long
 
 struct Page *pages;
 static u_long freemem; // 貌似定义的是内存分配的初始地址
@@ -30,6 +30,7 @@ void mips_detect_memory()
     // 接下来输出的就是一些方便调试的信息了
     printf("Physical memory: %dK avaiable,"(int)(maxpa / 1024));
     printf("base = %dK, extended = %dK\n", (int)(basemem / 1024), (int)(extmem / 1024));
+    // 初始化完成
 }
 /*
 再放一遍虚拟地址和物理地址的映射规则
@@ -43,14 +44,14 @@ static void *alloc(u_int n, u_int align, int clear)
 {
     // 下面对这些外部变量做详细解释
     // end变量的定义位于tools/scse0_3.lds:end=0x80400000(总结后)
-    // end是虚拟地址,为kseg0,对应的物理地址是0x400000
+    // end是虚拟地址,为kseg0,去除首位,得到对应的物理地址是0x400000
     // 所以我们管理的物理地址区间是[0x00400000,0x03ffffff]  (也就是说我们实际上只用了60MB的物理空间)
     // 这里观察include/mmu.h中的内存布局图,可以发现很多东西
-    // 0x80000000-0x8001000存放的是中断异常相关的代码
-    // 0x80010000-0x8040000存放的就是内核代码(全连上了,64MB物理空间)
+    // 0x80000000-0x80010000存放的是中断异常相关的代码
+    // 0x80010000-0x80400000存放的就是内核代码(全连上了,64MB物理空间)
     // 与之对应管理的虚拟内存区间是[0x80400000,0x83ffffff]
-    // 喵喵喵,那么这样的话不是说我们管理的内存空间完全不需要考虑TLB映射的问题了吗???
-    extern char end[];
+    // 喵喵喵,那么这样的话不是说我们管理的内存空间完全不需要考虑TLB映射的问题了吗???(全部位于kseg0中,直接将最高位置0即可得到物理地址)
+    extern char end[];  // end[]=0x80400000
     u_long alloced_mem; // 初始地址
 
     // 如果是第一次分配内存空间的话,需要将freemem置为地址的起始点
@@ -77,10 +78,43 @@ static Pte *boot_pgdir_walk(Pde *pgdir, u_long va, int create)
 void boot_map_segment(Pde *pgdir, u_long va, u_long size, u_long pa, int perm)
 {
 }
-
+/*官方定义
+设置二级页表
+*/
 void mips_vm_init()
 {
+    // 关于end的解释见alloc()
     extern char end[];
+    // 貌似最初的定义在boot/start.S中
+    /*
+    .global mCONTEXT
+    mCONTEXT:
+        .word 0
+    经过查询得知:.global是使得符号对链接器可见,是的mCONTEXT变为整个工程可见的全局变量
+    .word 0:为该变量分配4字节的存储空间,并用0对存储空间进行初始化
+    所以说mCONTEXT就是一个int(0)？(暂且认为是这样吧)
+    */
     extern int mCONTEXT;
     extern struct Env *envs;
+
+    // Pde=u_long,但是不理解为什么要u_long,明明虚拟地址最多32位u_int肯定够用
+    Pde *pgdir;
+    u_int n;
+
+    // 为一级页表分配一页内存空间(并将空间清空)
+    pgdir = alloc(BY2PG, BY2PG, 1); // pgdir = 0x80400000
+    printf("to memory %x for struct page directory.\n", freemem);
+    mCONTEXT = (int)pgdir; // 任然不清楚干啥用
+
+    // boot_pgdir是内核以及页表的初始虚拟地址
+    boot_pgdir = pgdir;
+}
+
+// 用于初始化Pages结构体以及空闲链表
+void page_init(void)
+{
+}
+
+int page_alloc(struct Page **pp)
+{
 }
