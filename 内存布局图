@@ -7,7 +7,7 @@
  o                      |   Interrupts & Exception   |  kseg1
  o                      +----------------------------+------------0xa000 0000
  o                      |      Invalid memory        |   /|\
- o                      +----------------------------+----|-------Physics Memory Max
+ o                      +----------------------------+----|-------0x83ff ffff(Physics Memory Max)
  o                      |                            |  kseg0
  o                      |                            |    |       
  o                      |                            |    |       

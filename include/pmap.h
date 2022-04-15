@@ -80,9 +80,14 @@ static inline u_long page2pa(struct Page *pp)
 // 若虚拟地址位于0x80000000~0x9fffffff(kseg0),则将虚拟内存的最高位置0即可得到物理地址,通过cache访存,这一部分用于存放内核代码与数据结构
 // 若虚拟地址位于0xa0000000~0xbfffffff(kseg1),则将虚拟地址的最高3位置0即可得到物理地址,不通过cache访存,这一部分用于映射外设
 // 若虚拟地址位于0x00000000~0x7fffffff(kuseg),则需要通过TLB来获取物理地址,通过cache访存(本实验涉及的虚拟空间,都在低2GB虚拟空间中进行访存操作)
-// 这里开始的函数实现暂时不写，之后再来完善
-static inline struct Page *pa2page(u_lone pa)
+
+// 总结:该函数需要传入物理地址,返回管理该物理地址对应页面的链表项地址
+static inline struct Page *pa2page(u_long *pa)
 {
+    // 如果物理页号大于最大物理页号
+    if (PPN(pa) >= npage)
+        panic("pa2page called with invalid pa");
+    return &pages[PPN(pa)];
 }
 static inline u_long page2kva(struct Page *pp)
 {

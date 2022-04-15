@@ -16,7 +16,14 @@ Part1. MIPS definitions
 #define BY2PG 4096              // 定义了页大小
 #define PDMAP (4 * 1024 * 1024) // 貌似是二级页表所占的空间大小？？
 #define PGSHIFT 12
-#define PDSHIFT 22
+// #define PDSHIFT 22
+
+// 官方:page number field of address
+
+// 按道理va传入的应该是物理地址,然后获取的是物理页数,这样pa2page函数就能说得通了
+#define PPN(va) (((u_long)(va)) >> 12)
+// 和PPN等效
+#define VPN(va) PPN(va)
 
 /*
 Part2. Our conventions
