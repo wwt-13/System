@@ -16,6 +16,12 @@ Pde *boot_pgdir; // Pde的定义在mmu.h中,原类型是u_long
 struct Page *pages;    // 定义的是链表数组
 static u_long freemem; // 貌似定义的是内存分配的初始地址
 
+/* 关于内存分配的疑问:为什么pages需要显式分配内存但是项page_free_list却只需要直接定义即可?
+这就涉及到了全局静态变量所分配的位置
+编译链接后,内核文件中的data段(起始位置无法确定,具体见内存布局图)用于存储初始化的全局变量和静态变量;
+bss段用于存储未初始化的全局变量和静态变量(程序运行结束自动释放,在程序执行之前会被系统自动清零(不知道是否需要由我们来实现?))
+所以说全局变量不需要我们来进行手动的分配,它会根据是否初始化被自动被分配到data段和bss段
+*/
 static struct Page_list page_free_list; // 定义的是链表head
 
 // 内存管理变量初始化函数
@@ -123,7 +129,21 @@ void mips_vm_init()
     printf("to memory %x for struct Pages.\n", freemem);
     // n是实际分配的内存空间大小
     n = ROUND(npage * sizeof(struct Page), BY2PG);
+    // boot_map_segment函数暂时还不太理解
+    // PADDR(pages)=pages的物理地址,PADDR的作用是获取kseg0段对应的物理地址
     boot_map_segment(pgdir, UPAGES, n, PADDR(pages), PTE_R);
+
+    /* 为进程管理所用到的Env结构体按照页分配内存
+    设NENV是最大进程数,NENV个Env结构体的大小为n,
+    一页的大小为m,由上述函数分析可知分配的大小为[n/m]*m,同时将分配的空间映射到上述的内核页表中,对应的起始虚拟地址为UENVS.
+    1. 经过测验,struct Env的大小为392个字节,NENV大小为1K,由此得分配的内存空间大小为392KB,
+    页大小为4KB,所以分配页数为392/4=98页(正好分配,不需要进行ROUND)
+    */
+    envs = (struct Env *)alloc(NENV * sizeof(struct Env), BY2PG, 1);
+    n = ROUND(NENV * sizeof(struct Env), BY2PG);
+    boot_map_segment(pgdir, UENVS, n, PADDR(envs), PTE_R);
+
+    printf("pmap.c\t mips vm init success\n");
 }
 
 // 用于初始化Pages结构体以及空闲链表
