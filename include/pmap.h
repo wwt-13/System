@@ -89,7 +89,7 @@ static inline struct Page *pa2page(u_long *pa)
         panic("pa2page called with invalid pa");
     return &pages[PPN(pa)];
 }
-// 将传入的物理地址(kseg0)转换为对于的虚拟地址
+// 将传入的链表项虚拟地址(kseg0)转换为对应虚拟地址
 static inline u_long page2kva(struct Page *pp)
 {
     return KADDR(page2pa(pp));

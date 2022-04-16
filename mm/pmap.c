@@ -14,7 +14,7 @@ u_long extmem;  // 扩展内存大小,本实验中不涉及,置0即可
 Pde *boot_pgdir; // Pde的定义在mmu.h中,原类型是u_long
 
 struct Page *pages;    // 定义的是链表数组
-static u_long freemem; // 貌似定义的是内存分配的初始地址
+static u_long freemem; // 用于记录内存分配的位置
 
 /* 关于内存分配的疑问:为什么pages需要显式分配内存但是项page_free_list却只需要直接定义即可?
 这就涉及到了全局静态变量所分配的位置
@@ -154,11 +154,64 @@ void mips_vm_init()
     printf("pmap.c\t mips vm init success\n");
 }
 
-// 用于初始化Pages结构体以及空闲链表
+/* 用于初始化Pages结构体以及空闲链表
+1. 利用链表宏初始化page_free_list
+2. 将mips_vm_init()中用到的空间对应的物理页面控制块的引用次数置1
+3. 将剩余的物理页面的引用次数置为0，并将对应的内存控制块插入page_free_list中
+*/
 void page_init(void)
 {
+    // 1
+    if (!LIST_EMPTY(&page_free_list))
+        LIST_INIT(&page_free_list);
+    // 这一步不可少(对于我的初始化方法而言)
+    freemem = ROUND(freemem, BY2PG);
+    // 2(根据freemem可得目前分配的物理页号)
+    for (int i = 0; i < PPN(PADDR(freemem)); i++)
+    {
+        pages[i]->pp_ref = 1;
+    }
+    // 3
+    for (int i = PPN(PADDR(freemem)); i < npage; i++)
+    {
+        pages[i]->pp_ref = 0;
+        LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
+    }
 }
-
+/* page_alloc函数
+1. 将page_free_list空闲链表头部内存控制块对应的物理页面分配出去
+2. 将其从空闲链表中移除(标记pp_ref=1+清空对应的物理页面)
+3. 将pp指向该链表项
+*/
 int page_alloc(struct Page **pp)
 {
+    if (LIST_EMPTY(&page_free_list))
+    {
+        return -E_NO_MEM;
+    }
+    Page *tmp = LIST_FIRST(&page_free_list);
+    LIST_REMOVE(tmp, pp_link);
+    tmp->pp_ref = 1;            // 标记为被分配(但是login没写，不知道为啥)
+    bzero(page2kva(pp), BY2PG); // 将对应的物理页面清空
+    *pp = tmp;
+    return 0;
+}
+/* 内存引用释放函数
+1. 判断pp指向的内存控制块的引用次数是否为0,为0则将对应的内存控制块插入到page_free_list中
+ */
+void page_free(struct Page *pp)
+{
+    if (pp->pp_ref > 0)
+    {
+        return;
+    }
+    else if (pp->pp_ref == 0)
+    {
+        LIST_INSERT_HEAD(&page_free_list, pp, pp_link);
+        return;
+    }
+    else
+    {
+        panic("pp_ref is less than 0\n");
+    }
 }
