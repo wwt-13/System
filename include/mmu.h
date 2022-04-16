@@ -1,9 +1,10 @@
 #ifndef _MMU_H_
 #define _MMU_H_
 
+#include "types.h"
 /*
 如下是官方原版注释:
-This file contains:
+This file contains(该文件包含了):
 Part1. MIPS definitions
 Part2. Our conventions(惯例)
 Part3. Our helper functions.
@@ -16,10 +17,11 @@ Part1. MIPS definitions
 #define BY2PG 4096              // 定义了页大小
 #define PDMAP (4 * 1024 * 1024) // 貌似是二级页表所占的空间大小？？
 #define PGSHIFT 12
-// #define PDSHIFT 22
+#define PDX(va) ((((u_long)(va)) >> 22) & 0x03ff) // 将虚拟地址的高10位&0x03ff(其实就是为了获取虚拟地址的高10位,获取虚拟地址的页目录索引)
+#define PTX(va) ((((u_long)(va)) >> 12) & 0x03ff) // 获取虚拟地址的中间10位(虚拟地址的页表索引)
+#define PTE_ADDR(pte) ((u_long)(pte) & ~0xfff)    // 清空低12位
 
 // 官方:page number field of address
-
 // 按道理va传入的应该是物理地址,然后获取的是物理页数,这样pa2page函数就能说得通了
 #define PPN(va) (((u_long)(va)) >> 12)
 // 和PPN等效
@@ -87,5 +89,16 @@ extern volatile Pde *vpd[];
         a - ULIM;                                            \
     })
 
-#endif
+/* 将物理地址转换为内核虚拟地址(kesg0)
+首先将根据物理地址获取物理块下标(判断是否超出内存空间)
+然后将物理地址与操作系统起始地址相加即可
+*/
+#define KADDR(pa)                                                    \
+    ({                                                               \
+        u_long ppn = PPN(pa);                                        \
+        if (ppn >= npage)                                            \
+            panic("KADDR called with invalid pa %08lx", (u_long)pa); \
+        (pa) + ULIM;                                                 \
+    })
+
 #endif

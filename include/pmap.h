@@ -42,7 +42,7 @@ struct Page
     u_short pp_ref; // 该页被alloc的次数
 };
 // 利用extern关键字引用外部已经定义的全局变量
-extern struct Page pages; // pages的定义位于pmap.c
+extern struct Page *pages; // pages的定义位于pmap.c
 
 // static inline详解
 // static
@@ -61,7 +61,7 @@ extern struct Page pages; // pages的定义位于pmap.c
 // 关键字inline推荐编译器，任何地方只要调用该文件的内联函数，就直接把该函数的机器码插入到调用它的地方，是的程序的执行更有效率(空间换时间)
 // 关于static和inline的具体细节还需要进一步的理解，以后有时间再来细看
 
-// 返回当前pp指向页在页数组中的下标
+// 返回当前pp指向页在页数组中的下标(和宏定义PPN的区别是可以直接传入虚拟地址)
 static inline u_long page2ppn(struct Page *pp)
 {
     return pp - pages;
@@ -71,7 +71,7 @@ static inline u_long page2pa(struct Page *pp)
 {
     // PGSHIFT的定义在mmu.h中,`#define PGSHIFT 12`
     // 所以此函数的作用是将pp指针指向链表项在数组中的下标左移12位
-    // 左移12位,刚好等于的是页的大小4K,所以本函数的目的是获取pp链表项对应页面相对于起始页面的偏移量
+    // 左移12位,刚好等于的是页的大小4K,所以本函数的目的是获取pp链表项对应页面相对于起始页面的偏移量(确实获取的是偏移量而不是物理地址)
     return page2ppn(pp) << PGSHIFT;
 }
 // 关于虚拟地址到物理地址的映射关系
@@ -81,7 +81,7 @@ static inline u_long page2pa(struct Page *pp)
 // 若虚拟地址位于0xa0000000~0xbfffffff(kseg1),则将虚拟地址的最高3位置0即可得到物理地址,不通过cache访存,这一部分用于映射外设
 // 若虚拟地址位于0x00000000~0x7fffffff(kuseg),则需要通过TLB来获取物理地址,通过cache访存(本实验涉及的虚拟空间,都在低2GB虚拟空间中进行访存操作)
 
-// 总结:该函数需要传入物理地址,返回管理该物理地址对应页面的链表项地址
+// 总结:pa2page需要传入物理地址,返回管理该物理地址对应页面的链表项地址
 static inline struct Page *pa2page(u_long *pa)
 {
     // 如果物理页号大于最大物理页号
@@ -89,11 +89,22 @@ static inline struct Page *pa2page(u_long *pa)
         panic("pa2page called with invalid pa");
     return &pages[PPN(pa)];
 }
+// 将传入的物理地址(kseg0)转换为对于的虚拟地址
 static inline u_long page2kva(struct Page *pp)
 {
+    return KADDR(page2pa(pp));
 }
 static inline u_long va2pa(Pde *pgdir, u_long va)
 {
+    Pte *p; // 等价于u_long *p;
+
+    pgdir = &pgdir[PDX(va)];
+    if (!(*pgdir & PTE_V))
+        return ~0;
+    p = (Pte *)KADDR(PTE_ADDR(*pgdir));
+    if (!(p[PTX(va)] & PTE_V))
+        return ~0;
+    return PTE_ADDR(p[PTX(va)]);
 }
 // 接下来是内存管理的函数定义,实现在mm/pmap.c中
 void mips_detect_memory();

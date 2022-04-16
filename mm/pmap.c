@@ -78,6 +78,14 @@ static void *alloc(u_int n, u_int align, int clear)
         panic("out of memory\n");
         return (void *)-E_NO_MEM;
     }
+
+    // 如果clear=1的话,清空分配的内存块(初始化)
+    if (clear)
+    {
+        bzero((void *)alloced_mem, n);
+    }
+
+    return (void *)alloced_mem;
 }
 static Pte *boot_pgdir_walk(Pde *pgdir, u_long va, int create)
 {
@@ -93,7 +101,7 @@ void mips_vm_init()
 {
     // 关于end的解释见alloc()
     extern char end[];
-    // 貌似最初的定义在boot/start.S中
+    // 最初的定义在boot/start.S中
     /*
     .global mCONTEXT
     mCONTEXT:
