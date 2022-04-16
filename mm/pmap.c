@@ -5,6 +5,13 @@
 #include "env.h"
 #include "error.h"
 
+/* 关于页表相关函数的约定
+1. 以boot为前缀的函数名表示该函数是在系统启动、初始化的时候调用的
+2. 不以boot为前缀的函数名表示该函数实在进程的生命周期中被调用的,用于操作进程的页表
+对于页面置换函数进行了简化,一旦物理页框被全部分配,进行新的映射的时候并不会进行任何的页面置换
+而是直接返回error,也就是-E_NO_MEM
+*/
+
 // 以下变量是要被mips_detect_memory函数初始化的变量
 u_long maxpa;   // 最大物理地址+1,即物理地址范围为[0,maxpa-1]
 u_long npage;   // 总物理页数(注意是物理页数不是虚拟页数)
@@ -30,7 +37,7 @@ void mips_detect_memory()
 {
     maxpa = 0x4000000;
     basemem = 0x4000000;
-    npage = basemem / BY2PG;
+    npage = basemem / BY2PG; // 16K个块
     extmem = 0;
 
     // 接下来输出的就是一些方便调试的信息了
@@ -87,12 +94,53 @@ static void *alloc(u_int n, u_int align, int clear)
 
     return (void *)alloced_mem;
 }
+/* 启动时的二级页表检索函数
+返回以及一级页表基地址pgdir对应的页表结构中,va这个虚拟地址所在的二级页表项
+如果create!=0则对应的二级页表不存在则会使用alloc函数分配一页物理内存用于存放
+之所以使用alloc而不适用page_alloc的原因是因为这个函数是在内核启动过程中使用的
+此时还未建立物理内存管理机制(此时还没有内存管理链表数组)
+ */
 static Pte *boot_pgdir_walk(Pde *pgdir, u_long va, int create)
 {
+    Pde *pgdir_entryp;
+    Pte *pgtable, *pgtable_entry;
+    pgdir_entryp = pgdir + PDX(va); // 获取va对应的一级页表项
+    if ((*pgdir_entryp & PTE_V) == 0)
+    {
+        if (create)
+        {
+            // 返回物理地址
+            *pgdir_entryp = PADDR(alloc(BY2PG, BY2PG, 1));
+            // 因为分配到的地址一定能被BY2PG整除,所以末12位可以用来表示标志位
+            *pgdir_entryp = (*pgdir_entryp) | PTE_V | PTE_R;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    // 清楚添加的标志位对地址造成的影响并将其转换为虚拟地址(理解了)
+    pgtable = (Pte *)KADDR(PTE_ADDR(*pgdir_entryp));
+    pgtable_entry = pgtable + PTX(va);
+    return pgtable_entry;
 }
-//
+/* 启动时的区间映射函数
+作用是将一级页表基地址pgdir对应的二级页表结构做区间地址映射
+将虚拟地址区间[va,va+size-1]映射到物理地址区间[pa,pa+size-1]
+因为是按页映射,要求size必须是页面大小的整数倍
+同时将相关页表项的权限设置为perm
+(就是将va开始的size(需要经过对BY2PG向上取整)大小的空间映射到物理地址中去)
+*/
 void boot_map_segment(Pde *pgdir, u_long va, u_long size, u_long pa, int perm)
 {
+    int i;
+    Pte *pgtable_entry;
+    for (int i = 0, size = ROUND(size, BY2PG); i < size; i += BY2PG)
+    {
+        // 获得二级页表项对应的虚拟空间地址
+        pgtable_entry = boot_pgdir_walk(pgdir, va + i, 1);
+        *pgtable_entry = PTE_ADDR(pa + i) | perm | PTE_V;
+    }
 }
 /*官方定义
 设置二级页表
@@ -137,9 +185,9 @@ void mips_vm_init()
     printf("to memory %x for struct Pages.\n", freemem);
     // n是实际分配的内存空间大小
     n = ROUND(npage * sizeof(struct Page), BY2PG);
-    // boot_map_segment函数暂时还不太理解
+    // boot_map_segemnt就是将
     // PADDR(pages)=pages的物理地址,PADDR的作用是获取kseg0段对应的物理地址
-    boot_map_segment(pgdir, UPAGES, n, PADDR(pages), PTE_R);
+    boot_map_segment(pgdir, UPAGES, n, PADDR(pages), PTE_R); // 不懂这一步究竟是什么目的
 
     /* 为进程管理所用到的Env结构体按照页分配内存
     设NENV是最大进程数,NENV个Env结构体的大小为n,
@@ -213,5 +261,65 @@ void page_free(struct Page *pp)
     else
     {
         panic("pp_ref is less than 0\n");
+    }
+}
+/* boot_pgdir_walk的非启动版本
+区别如下
+1. 前者在内核启动的过程中,不允许失败,后者则是普通运行过程,空间不够允许失败,返回失败码
+2. 要将原本的返回值放到ppte的所指的空间上
+*/
+int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte)
+{
+    Pde *pgdir_entry = pgdir + PDX(va);
+    Pte *pgtable;
+
+    if ((*pgdir_entry & PTE_V) == 0)
+    {
+        int ret = 0;
+        struct Page *tmp;
+        if (create)
+        {
+            int ret = 0;
+            if ((ret = page_alloc(&tmp)) < 0)
+                return ret;
+            else
+            {
+                tmp->pp_ref++;
+                *pgdir_entry = (page2pa(tmp)) | PTE_V | PTE_R;
+                return ret;
+            }
+        }
+        else
+        {
+            *ppte = 0;
+            return 0;
+        }
+    }
+    pgtable = (Pte *)KADDR(PTE_ADDR(pgdir_entry));
+    *ppte = pgtable + PTX(va);
+}
+/* 地址映射函数
+将va这一虚拟地址映射到内存控制块pp对应的物理页面
+并将页表项权限设置为perm
+*/
+int page_insert(Pde *pgdir, struct Page *pp, u_long va, u_int perm)
+{
+    Pte *pgtable_entry;
+    // 判断是否已经对对应的物理页面建立二级页表
+    pgdir_walk(pgdir, va, 0, &pgtable_entry);
+    if (pgtable_entry != 0 && (*pgtable_entry & PTE_V) != 0)
+    {
+    }
+}
+// 可以实现删除特定虚拟地址的映射
+void tlb_invalidate(Pde *pgdir, u_long va)
+{
+    if (curenv)
+    {
+        tlb_out(PTE_ADDR(va) | GET_ENV_ASID(curenv->env_id));
+    }
+    else
+    {
+        tlb_out(PTE_ADDR(va));
     }
 }

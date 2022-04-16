@@ -15,7 +15,7 @@ Part1. MIPS definitions
 */
 
 #define BY2PG 4096              // 定义了页大小
-#define PDMAP (4 * 1024 * 1024) // 貌似是二级页表所占的空间大小？？
+#define PDMAP (4 * 1024 * 1024) // (每个页目录映射的字节大小？)
 #define PGSHIFT 12
 #define PDX(va) ((((u_long)(va)) >> 22) & 0x03ff) // 将虚拟地址的高10位&0x03ff(其实就是为了获取虚拟地址的高10位,获取虚拟地址的页目录索引)
 #define PTX(va) ((((u_long)(va)) >> 12) & 0x03ff) // 获取虚拟地址的中间10位(虚拟地址的页表索引)
@@ -27,6 +27,16 @@ Part1. MIPS definitions
 // 和PPN等效
 #define VPN(va) PPN(va)
 
+/* 页表项标志位
+一级页表项(页目录项)
+*/
+#define PTE_G 0x0100       // Global bit:第9位
+#define PTE_V 0x0200       // Valid bit:第10位
+#define PTE_R 0x0400       // Dirty bit:第11位'1'意味着可写,对于该页表项对应页面的写操作都必须在页面置换的时候写回内存
+#define PTE_D 0x0002       // filesystem cached is dirty(没懂)
+#define PTE_COW 0x0001     // Copy on Write
+#define PTE_UC 0x0800      // 12位:unCached
+#define PTE_LIBRARY 0x0004 // share memory
 /*
 Part2. Our conventions
 */
@@ -40,6 +50,9 @@ Part2. Our conventions
 #define KSTKSIZE (8 * BY2PG)    // 貌似是栈大小？？
 #define ULIM 0x80000000         // 操作系统的起始地址
 
+#define UVPT (ULIM - PDMAP)    // 0x7fc0 0000
+#define UPAGES (UVPT - PDMAP)  // 0x7f80 0000
+#define UENVS (UPAGES - PDMAP) // 0x7f40 0000
 // 这里还有一些宏,暂时不管
 
 /*
@@ -62,8 +75,8 @@ extern char bootstacktop[], bootstack[];
 // 定义物理页的大小
 extern u_long npage;
 
-typedef u_long Pde;
-typedef u_long Pte;
+typedef u_long Pde; // 用于表示一级页表项
+typedef u_long Pte; // 用于表示二级页表项:page table entry
 
 /* 关于volatile变量
 定义为volatile的变量就是对编译器声明该变量可能会被意想不到的改变

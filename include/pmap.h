@@ -67,6 +67,7 @@ static inline u_long page2ppn(struct Page *pp)
     return pp - pages;
 }
 // 获取pp链表项对应页面相对于起始页面的偏移量(如果起始页面的地址为0,那么获取的就是物理地址?)
+// 上面那句话说的不全,获取的就是对应链表项的对应管理页面的物理地址！！！
 static inline u_long page2pa(struct Page *pp)
 {
     // PGSHIFT的定义在mmu.h中,`#define PGSHIFT 12`
