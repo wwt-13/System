@@ -1,4 +1,4 @@
-// 按照知乎上的解释,""是优先在当前文件夹下寻找,而<>是在include文件夹下寻找(不过这里我还是没懂用""的原因)
+// 按照知乎上的解释,""是优先在当前文件夹下寻找,而<>是在include文件夹下寻找
 #include "mmu.h"
 #include "pmap.h"
 #include "printf.h"

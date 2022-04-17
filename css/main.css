@@ -1,0 +1,47 @@
+body {
+    font-family: "Microsoft YaHei", Times, serif;
+    /* 可用于设置表格居中 */
+    text-align: center;
+}
+
+.content-table {
+    /* 设置表格边框为合并 */
+    border-collapse: collapse;
+    /* 设置文字居中 */
+    text-align: center;
+    /* 使得table和上下元素之间分隔开 */
+    margin: auto;
+    font-size: 1.3em;
+    min-width: 75%;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead tr {
+    background-color: rgb(91, 189, 156);
+    color: aliceblue;
+    font-weight: bold;
+}
+
+.content-table th td {
+    padding: 12px 15px;
+}
+
+.content-table tbody tr {
+    border-bottom: 1px solid white;
+}
+
+.content-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.content-table tr:hover {
+    font-weight: bold;
+    background-color: azure;
+    color: #009879
+}
