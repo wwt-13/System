@@ -99,30 +99,31 @@ static void *alloc(u_int n, u_int align, int clear)
 如果create!=0则对应的二级页表不存在则会使用alloc函数分配一页物理内存用于存放
 之所以使用alloc而不适用page_alloc的原因是因为这个函数是在内核启动过程中使用的
 此时还未建立物理内存管理机制(此时还没有内存管理链表数组)
+根据传入的虚拟地址,分配对应二级页表项的虚拟地址
  */
 static Pte *boot_pgdir_walk(Pde *pgdir, u_long va, int create)
 {
-    Pde *pgdir_entryp;
+    // pgdir是一级页表的基地址
+    Pde *pgdir_entryp = pgdir + PDX(va); // 获取va对应的一级页表项
     Pte *pgtable, *pgtable_entry;
-    pgdir_entryp = pgdir + PDX(va); // 获取va对应的一级页表项
-    if ((*pgdir_entryp & PTE_V) == 0)
+    if ((*pgdir_entryp & PTE_V) == 0) // 估计是判断该一级页表项对应的二级页表是否存在
     {
         if (create)
         {
-            // 返回物理地址
+            // 一级页目录表项中存储的是物理地址
             *pgdir_entryp = PADDR(alloc(BY2PG, BY2PG, 1));
             // 因为分配到的地址一定能被BY2PG整除,所以末12位可以用来表示标志位
-            *pgdir_entryp = (*pgdir_entryp) | PTE_V | PTE_R;
+            *pgdir_entryp = (*pgdir_entryp) | PTE_V | PTE_R; // 设置PTE_R代表可写
         }
         else
         {
             return 0;
         }
     }
-    // 清楚添加的标志位对地址造成的影响并将其转换为虚拟地址(理解了)
+    // 清除添加的标志位对地址造成的影响并将其转换为虚拟地址(理解了)
     pgtable = (Pte *)KADDR(PTE_ADDR(*pgdir_entryp));
     pgtable_entry = pgtable + PTX(va);
-    return pgtable_entry;
+    return pgtable_entry; // 返回二级页表项的虚拟地址
 }
 /* 启动时的区间映射函数
 作用是将一级页表基地址pgdir对应的二级页表结构做区间地址映射
@@ -237,10 +238,11 @@ int page_alloc(struct Page **pp)
     {
         return -E_NO_MEM;
     }
-    Page *tmp = LIST_FIRST(&page_free_list);
+    struct Page *tmp = LIST_FIRST(&page_free_list);
     LIST_REMOVE(tmp, pp_link);
-    tmp->pp_ref = 1;            // 标记为被分配(但是login没写，不知道为啥)
-    bzero(page2kva(pp), BY2PG); // 将对应的物理页面清空
+    // 这里不能写tmp->pp_ref的是在别的地方会写
+    // tmp->pp_ref = 1;             // 标记为被分配(但是login没写，不知道为啥)
+    bzero(page2kva(tmp), BY2PG); // 将对应的物理页面清空
     *pp = tmp;
     return 0;
 }
@@ -254,7 +256,7 @@ void page_free(struct Page *pp)
         return;
     }
     else if (pp->pp_ref == 0)
-    {
+    { // 插入空闲链表
         LIST_INSERT_HEAD(&page_free_list, pp, pp_link);
         return;
     }
@@ -273,43 +275,111 @@ int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte)
     Pde *pgdir_entry = pgdir + PDX(va);
     Pte *pgtable;
 
-    if ((*pgdir_entry & PTE_V) == 0)
+    if ((*pgdir_entry & PTE_V) == 0) // 对应二级页表不存在
     {
-        int ret = 0;
-        struct Page *tmp;
+        struct Page *tmp; // 需要分配对应的内存管理链表管理内存
         if (create)
         {
-            int ret = 0;
-            if ((ret = page_alloc(&tmp)) < 0)
-                return ret;
-            else
-            {
-                tmp->pp_ref++;
-                *pgdir_entry = (page2pa(tmp)) | PTE_V | PTE_R;
-                return ret;
-            }
+            if (page_alloc(&tmp) == -E_NO_MEM) // 无法分配内存
+                return -E_NO_MEM;
+            tmp->pp_ref++;
+            *pgdir_entry = (page2pa(tmp)) | PTE_V | PTE_R;
         }
         else
         {
             *ppte = 0;
             return 0;
+            // 这里不是很懂为啥要返回0？
         }
     }
-    pgtable = (Pte *)KADDR(PTE_ADDR(pgdir_entry));
-    *ppte = pgtable + PTX(va);
+    pgtable = (Pte *)KADDR(PTE_ADDR(*pgdir_entry));
+    *ppte = pgtable + PTX(va); // 返回的是对应二级页表项虚拟地址
+    return 0;
 }
-/* 地址映射函数
+/* 增加地址映射函数
 将va这一虚拟地址映射到内存控制块pp对应的物理页面
 并将页表项权限设置为perm
 */
 int page_insert(Pde *pgdir, struct Page *pp, u_long va, u_int perm)
 {
     Pte *pgtable_entry;
-    // 判断是否已经对对应的物理页面建立二级页表
-    pgdir_walk(pgdir, va, 0, &pgtable_entry);
-    if (pgtable_entry != 0 && (*pgtable_entry & PTE_V) != 0)
+    pgdir_walk(pgdir, va, 0, &pgtable_entry);                // 判断是否已经对对应的物理页面建立二级页表
+    if (pgtable_entry != 0 && (*pgtable_entry & PTE_V) != 0) // 代表以创建二级页表
     {
+        // 判断二级页表对应页面是否被pp管理
+        if (pa2page(*pgtable_entry) != pp)
+        { // 如果管理的不是pp，则将va对应的二级页表移除
+            // 猜测是将管理va对应的二级页表的页面移除
+            page_remove(pgdir, va);
+        }
+        else
+        { // tlb中存储各种页表项
+            // 貌似是标记更新tlb
+            tlb_invalidate(pgdir, va);
+            *pgtable_entry = (page2pa(pp) | perm | PTE_V);
+            return 0;
+        }
     }
+    tlb_invalidate(pgdir, va);
+
+    if (pgdir_walk(pgdir, va, 1, &pgtable_entry) != 0)
+    {
+        return -E_NO_MEM;
+    }
+    *pgtable_entry = page2pa(pp) | perm | PTE_V;
+    pp->pp_ref++;
+    return 0;
+}
+/* 寻找映射的物理地址函数
+返回va这一虚拟地址映射对应的物理页面对应的内存控制块，同时将ppte指向的空间设为对应的二级页表项地址
+*/
+struct Page *page_lookup(Pde *pgdir, u_long va, Pte **ppte)
+{
+    struct Page *ppage;
+    Pte *pte;
+    // 获取二级页表项存放的物理地址
+    pgdir_walk(pgdir, va, 0, &pte);
+    if (pte == 0 || (*pte & PTE_V == 0))
+    {
+        return 0;
+    }
+    // 获取物理页面对应的内存控制块
+    ppage = pa2page(*pte);
+    if (ppte) // 这一步判断没理解
+    {
+        *ppte = pte;
+    }
+    return ppage;
+}
+// 用于减少页面应用次数的函数,如果引用次数归零,则自动将链表项归入空闲链表集合中
+void page_decref(struct Page *pp)
+{
+    if (--pp->pp_ref == 0)
+    {
+        page_free(pp);
+    }
+}
+/* 取消地址映射函数
+删除一级页表pgdir对应的二级页表中va这一虚拟地址对物理地址的映射(需要减少物理页面的引用次数)
+*/
+void page_remove(Pde *pgdir, u_long va)
+{
+    Pte *pgtable_entry;
+    struct Page *ppage;
+
+    ppage = page_lookup(pgdir, va, &pgtable_entry);
+    if (ppage == 0)
+    {
+        return
+    }
+    else
+    {
+        page_decref(ppage);
+    }
+    // 将对应的二级页表项置空
+    *pgtable_entry = 0;
+    tlb_invalidate(pgdir, va);
+    return;
 }
 // 可以实现删除特定虚拟地址的映射
 void tlb_invalidate(Pde *pgdir, u_long va)
@@ -322,4 +392,10 @@ void tlb_invalidate(Pde *pgdir, u_long va)
     {
         tlb_out(PTE_ADDR(va));
     }
+}
+/* 被动地址映射函数
+暂时没看懂....
+*/
+void pageout(int va, int context)
+{
 }

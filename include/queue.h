@@ -74,7 +74,8 @@ Linux和其它代码库里的宏都用do/while(0)来包围执行逻辑，因为�
     {                                                                              \
         LIST_NEXT((elm), field) = LIST_NEXT((listelm), field);                     \
         LIST_NEXT((listelm), field) = (elm);                                       \
-        LIST_NEXT((elm), field)->field.le_prev = &LIST_NEXT((elm), field);         \
+        if (LIST_NEXT((elm), field) != NULL)                                       \
+            LIST_NEXT((elm), field)->field.le_prev = &LIST_NEXT((elm), field);     \
         LIST_NEXT((listelm), field)->field.le_prev = &LIST_NEXT((listelm), field); \
     } while (0)
 
